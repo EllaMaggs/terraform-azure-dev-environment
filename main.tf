@@ -66,3 +66,32 @@ resource "azurerm_subnet_network_security_group_association" "emtf-sga" {
   subnet_id                 = azurerm_subnet.emtf-subnet.id
   network_security_group_id = azurerm_network_security_group.emtf-sg.id
 }
+
+resource "azurerm_public_ip" "emtf-ip" {
+  name                = "emtf-ip"
+  resource_group_name = azurerm_resource_group.emtf-rg.name
+  location            = azurerm_resource_group.emtf-rg.location
+
+  allocation_method = "Dynamic"
+  sku               = "Basic"
+
+  tags = {
+    environment = "Dev"
+  }
+}
+
+resource "azurerm_network_interface" "emtf-nic" {
+  name                = "emtf-nic"
+  location            = azurerm_resource_group.emtf-rg.location
+  resource_group_name = azurerm_resource_group.emtf-rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.emtf-subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.emtf-ip.id
+  }
+  tags = {
+    environment = "dev"
+  }
+}
