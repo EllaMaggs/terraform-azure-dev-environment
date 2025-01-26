@@ -95,3 +95,34 @@ resource "azurerm_network_interface" "emtf-nic" {
     environment = "dev"
   }
 }
+
+resource "azurerm_linux_virtual_machine" "emtf-vm" {
+  name                  = "emtf-vm"
+  resource_group_name   = azurerm_resource_group.emtf-rg.name
+  location              = azurerm_resource_group.emtf-rg.location
+  size                  = "Standard_B1s"
+  admin_username        = "adminuser"
+  network_interface_ids = [azurerm_network_interface.emtf-nic.id]
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = file("~/.ssh/emtfazurekey.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "18.04.202401161" # Later versions not available in West Europe
+  }
+
+  tags = {
+    environment = "dev"
+  }
+
+}
