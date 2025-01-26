@@ -104,9 +104,12 @@ resource "azurerm_linux_virtual_machine" "emtf-vm" {
   admin_username        = "adminuser"
   network_interface_ids = [azurerm_network_interface.emtf-nic.id]
 
+  custom_data = filebase64("customdata.tpl")
+
   admin_ssh_key {
     username   = "adminuser"
-    public_key = file("~/.ssh/emtfazurekey.pub")
+    public_key = file("/Users/ella/.ssh/emtfazurekey.pub")
+
   }
 
   os_disk {
@@ -119,6 +122,16 @@ resource "azurerm_linux_virtual_machine" "emtf-vm" {
     offer     = "UbuntuServer"
     sku       = "18.04-LTS"
     version   = "18.04.202401161" # Later versions not available in West Europe
+  }
+
+  provisioner "local-exec" {
+      command = templatefile ("linux-ssh-script.tpl" ,{
+          hostname = self.public_ip_address,
+          user = "adminuser"
+          identityfile = "~/.ssh/emtfazurekey"
+      })
+      interpreter = ["bash", "-c"]
+      
   }
 
   tags = {
