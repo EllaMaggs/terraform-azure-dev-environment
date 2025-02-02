@@ -125,17 +125,25 @@ resource "azurerm_linux_virtual_machine" "emtf-vm" {
   }
 
   provisioner "local-exec" {
-      command = templatefile ("linux-ssh-script.tpl" ,{
-          hostname = self.public_ip_address,
-          user = "adminuser"
-          identityfile = "~/.ssh/emtfazurekey"
-      })
-      interpreter = ["bash", "-c"]
-      
+    command = templatefile("linux-ssh-script.tpl", {
+      hostname     = self.public_ip_address,
+      user         = "adminuser"
+      identityfile = "~/.ssh/emtfazurekey"
+    })
+    interpreter = ["bash", "-c"]
+
   }
 
   tags = {
     environment = "dev"
   }
+}
 
+data "azurerm_public_ip" "emtf-ip-data" {
+  name                = azurerm_public_ip.emtf-ip.name
+  resource_group_name = azurerm_resource_group.emtf-rg.name
+}
+
+output "public_ip_address" {
+  value = "${azurerm_linux_virtual_machine.emtf-vm.name}: ${data.azurerm_public_ip.emtf-ip-data.ip_address}"
 }
