@@ -125,13 +125,12 @@ resource "azurerm_linux_virtual_machine" "emtf-vm" {
   }
 
   provisioner "local-exec" {
-    command = templatefile("linux-ssh-script.tpl", {
+    command = templatefile(linux-ssh-script.tpl, {
       hostname     = self.public_ip_address,
-      user         = "adminuser"
+      user         = "adminuser",
       identityfile = "~/.ssh/emtfazurekey"
     })
     interpreter = ["bash", "-c"]
-
   }
 
   tags = {
